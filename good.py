@@ -24,20 +24,6 @@ def initialize_goal_duration():
     if 'goal_duration' not in st.session_state:
         st.session_state.goal_duration = 0
 
-# 데이터베이스 초기화 및 연결
-def initialize_database():
-    if 'db_connection' not in st.session_state:
-        st.session_state.db_connection = sqlite3.connect('exercise.db')
-        st.session_state.db_connection.execute('''
-            CREATE TABLE IF NOT EXISTS exercise (
-                id INTEGER PRIMARY KEY,
-                date TEXT,
-                exercise_type TEXT,
-                duration INTEGER,
-                calories INTEGER
-            )
-        ''')
-
 # 운동 기록 초기화
 def initialize_exercise_records():
     if 'exercise_records' not in st.session_state:
@@ -108,14 +94,9 @@ def visualize_data(df):
     else:
         st.write("운동 기록이 없습니다.")
 
-# 데이터베이스 연결 해제
-def close_database_connection():
-    st.session_state.db_connection.close()
-
 # 메인 함수
 def main():
     initialize_goal_duration()
-    initialize_database()
     initialize_exercise_records()
     set_goal_duration()
     record_exercise()
@@ -123,7 +104,6 @@ def main():
     weekly_duration = calculate_weekly_duration(df)
     visualize_goal_progress(weekly_duration)
     visualize_data(df)
-    close_database_connection()
 
 if __name__ == "__main__":
     main()
