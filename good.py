@@ -98,4 +98,3 @@ if not df.empty:
     st.pyplot(fig)
 else:
     st.write("운동 기록이 없습니다.")
-
