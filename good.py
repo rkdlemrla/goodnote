@@ -1,7 +1,6 @@
 import streamlit as st
 import pandas as pd
 import matplotlib.pyplot as plt
-import sqlite3
 from datetime import datetime
 
 # 이미지 표시
