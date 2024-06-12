@@ -39,6 +39,11 @@ def initialize_database():
             )
         ''')
 
+# 운동 기록 초기화
+def initialize_exercise_records():
+    if 'exercise_records' not in st.session_state:
+        st.session_state.exercise_records = []
+
 # 목표 설정
 def set_goal_duration():
     st.sidebar.title("목표 설정")
@@ -60,16 +65,12 @@ def record_exercise():
             st.error("운동 시간은 0보다 커야 합니다.")
         else:
             calories = duration * CALORIES_PER_MIN[exercise_type]
-            st.session_state.db_connection.execute('''
-                INSERT INTO exercise (date, exercise_type, duration, calories)
-                VALUES (?, ?, ?, ?)
-            ''', (date, exercise_type, duration, calories))
-            st.session_state.db_connection.commit()
+            st.session_state.exercise_records.append((date, exercise_type, duration, calories))
             st.success(f"운동 기록이 저장되었습니다. 소모한 칼로리: {calories} kcal")
 
 # 운동 기록 불러오기
 def load_exercise_records():
-    df = pd.read_sql('SELECT * FROM exercise', st.session_state.db_connection)
+    df = pd.DataFrame(st.session_state.exercise_records, columns=['date', 'exercise_type', 'duration', 'calories'])
     df['date'] = pd.to_datetime(df['date'])
     return df
 
@@ -101,9 +102,9 @@ def visualize_data(df):
     st.write("### 운동 종류별 칼로리 소모량")
     if not df.empty:
         fig, ax = plt.subplots()
-        df.groupby('exercise_type')['calories'].sum().plot(kind='bar', ax=ax)
-        ax.set_ylabel("칼로리 소모량 (kcal)")
-        ax.set_xlabel("운동 종류")
+        df.groupby('exercise_type')['calories'].sum().plot(kind='barh', ax=ax)  # 가로 막대 그래프로 변경
+        ax.set_xlabel("칼로리 소모량 (kcal)")  # x축 라벨 추가
+        ax.set_ylabel("운동 종류")  # y축 라벨 추가
         st.pyplot(fig)
     else:
         st.write("운동 기록이 없습니다.")
@@ -116,6 +117,7 @@ def close_database_connection():
 def main():
     initialize_goal_duration()
     initialize_database()
+    initialize_exercise_records()
     set_goal_duration()
     record_exercise()
     df = load_exercise_records()
